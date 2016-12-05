@@ -69,17 +69,19 @@ public class SARSA extends Algorithm{
         int[] newAction = {0, 0};
         double OldQ = 0;
         double newQ = 0;
-        double reward = 0.1; //is this the "epsilon" declared in the sample code?
+        double reward = -1; //NO IDEA. Should this be -1? The cost of any move but crossing the finish line? YES. //how do we make it = the actual reward if it IS crossing the finishline?
+        double epsilon = 0.1;
         double alpha=0.2;
         double gamma=0.9;
         double Q = 0;
+        Q = {};
         
         if (OldQ == 0) {
             newQ[(state, action)] = reward; 
         }
         else
         newQ = OldQ + alpha*(Q - OldQ);
-        Q = reward(newAction) + gamma*Q[(newAction,newState)];
+        Q = reward(newAction) + gamma*Q[(newAction,newState)]; //r{{t+1}} == ??
         
         
         return accl;
