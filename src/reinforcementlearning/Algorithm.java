@@ -14,6 +14,8 @@ public class Algorithm {
     private TrackGUI gui;
     private int[] orgPos;
     protected Random random;
+    private int crash;
+    private int move;
     
     public Algorithm(RaceTrack t, RaceCar c, TrackGUI g){
         track = t;
@@ -24,6 +26,8 @@ public class Algorithm {
     }
     
     public void runCar(boolean hit){
+        crash = 0;
+        move = 0;
         time = 0;
         cost = 0;
         orgPos[0] = car.getXPos();
@@ -31,7 +35,7 @@ public class Algorithm {
         boolean finished = false;
         int lastxp, lastyp;
         while(! finished){
-            gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
+            //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
             int[] accl = findNextMove();
             if(car.accelNotWork(accl[0], accl[1], 1)) continue;
             cost++;
@@ -40,21 +44,28 @@ public class Algorithm {
             time += 1;
             car.accelerate(accl[0], accl[1], 1);
             if(track.notCrash(car.getXPos(), car.getYPos(), lastxp, lastyp)){
+                move++;
                 if(track.getCell(car.getXPos(), car.getYPos()) == 'F'){
-                    System.out.println("last position: (" + lastxp + "," + lastyp + ")");
-                    System.out.println("final position: (" + car.getXPos() + "," + car.getYPos() + ")");
+                    //System.out.println("last position: (" + lastxp + "," + lastyp + ")");
+                    System.out.print("final position: (" + car.getXPos() + "," + car.getYPos() + ")");
+                    System.out.print(" Number of times acceleration was possible: " + move);
+                    System.out.println(" Number of crashes to get here: " + crash);
                     cost--;
                     finished = true;
                 }
             } else {
+                crash++;
                 // car.setPos(lastxp, lastyp); car.setVel(0, 0);
+                //System.out.println("Car crashed into wall trying to get to (" + car.getXPos() + "," + car.getYPos() + ")");
                 if(hit){
                     hitWall();
+                    //System.out.println("Car sent to (" + car.getXPos() + "," + car.getYPos() + ")");
                 } else {
                     hitWall(lastxp, lastyp);
+                    //System.out.println("Car sent to original position (" + orgPos[0] + "," + orgPos[1] + ")");
                 }
                 if(! track.cellSafe(car.getXPos(), car.getYPos())){
-                    gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
+                    //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
                     System.out.println("Program messed up");
                     return;
                 }
@@ -183,6 +194,6 @@ public class Algorithm {
     }
     
     public String toString(){
-        return "Algorithm\nOriginal Position: (" + orgPos[0] + "," + orgPos[1] + ") Cost of Trial: " + cost + " Time of Trial: " + time;
+        return "Algorithm\nOriginal Position: (" + orgPos[0] + "," + orgPos[1] + ") Time of Trial: " + time + " Cost of Trial: " + cost;
     }
 }

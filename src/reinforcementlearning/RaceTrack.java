@@ -111,19 +111,7 @@ public class RaceTrack {
                         if(! cellSafe(x+i,y+j)) return false;
                     }
                 }
-            }/* else if(changex == 1 || changey == 1){
-                int x, y;
-                if(x1<x2) x = x1;
-                else x = x2;
-                if(y1<y2) y = y1;
-                else y = y2;
-                for(int i = 0; i <= changex; i++){
-                    for(int j = 0; j <= changey; j++){
-                        if((y+j == y1 && x+i == x2) || (y+j == y2 && x+i == x1)) continue;
-                        if(! cellSafe(x+i,y+j)) return false;
-                    }
-                }
-            }*/ else if(changey > changex){
+            } else if(changey > changex){
                 double slope = changex / changey;
                 int x,y;
                 double xd;
