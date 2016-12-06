@@ -31,34 +31,7 @@ public class SARSA extends Algorithm{
         //ALPHA - The learning rate determines to what extent the newly acquired information will override the old information. A factor of 0 will make the agent not learn anything, while a factor of 1 would make the agent consider only the most recent information.
         //GAMMA - The discount factor determines the importance of future rewards. A factor of 0 will make the agent "opportunistic" by only considering current rewards, while a factor approaching 1 will make it strive for a long-term high reward. If the discount factor meets or exceeds 1, the {\displaystyle Q} Q values may diverge.
         //LOOK AT THE CODE ATTACHED TO THIS FUCKING WEB PAGE IF IT STILL ISN'T MAKING SENSE: https://studywolf.wordpress.com/2013/07/01/reinforcement-learning-sarsa-vs-q-learning/
-        /* EXAMPLE CODE
-        def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
-          def getQ(self, state, action):
-        return self.q.get((state, action), 0.0)
-    def learnQ(self, state, action, reward, value):
-        oldv = self.q.get((state, action), None)
-        if oldv is None:
-            self.q[(state, action)] = reward 
-        else:
-            self.q[(state, action)] = oldv + self.alpha * (value - oldv)
-    def chooseAction(self, state):
-        if random.random() < self.epsilon:
-            action = random.choice(self.actions)
-        else:
-            q = [self.getQ(state, a) for a in self.actions]
-            maxQ = max(q)
-            count = q.count(maxQ)
-            if count > 1:
-                best = [i for i in range(len(self.actions)) if q[i] == maxQ]
-                i = random.choice(best)
-            else:
-                i = q.index(maxQ)
-            action = self.actions[i]
-        return action
-    def learn(self, state1, action1, reward, state2, action2):
-        qnext = self.getQ(state2, action2)
-        self.learnQ(state1, action1, reward, reward + self.gamma * qnext)
-        */
+        // OR EXAMPLE CODE HERE: https://github.com/studywolf/blog/tree/master/RL/SARSA%20vs%20Qlearn%20cliff
         
         //Q(s{t},a{t}) leftarrow Q(s{t},a{t})+ alpha [r{{t+1}}+ gamma Q(s{{t+1}},a{{t+1}})-Q(s{t},a{t})]
         int newXaccel = 0;
@@ -67,17 +40,24 @@ public class SARSA extends Algorithm{
         int[] newState = {-5000, -5000, -5000, -5000 };
         int[] action = {newXaccel, newYaccel};
         int[] newAction = {0, 0};
-        double OldQ = 0;
+        //double OldQ = 0;
         double newQ = 0;
-        double reward = -1; //NO IDEA. Should this be -1? The cost of any move but crossing the finish line? YES. //how do we make it = the actual reward if it IS crossing the finishline?
+        int reward = -1; //NO IDEA. Should this be -1? The cost of any move but crossing the finish line? YES. //Needs to be a LARGE negative value for crashing? //how do we make it = the actual reward if it IS crossing the finishline?
         double epsilon = 0.1;
         double alpha=0.2;
         double gamma=0.9;
-        double Q = 0;
-        Q = {};
-        
-        if (OldQ == 0) {
-            newQ[(state, action)] = reward; 
+        //The sample code just has q as an empty array. Q = {}. WTF?
+        //in "choose action" method q = [self.getQ(state, a) for a in self.actions]
+        int[][] Q = {state, action};
+        int qValue = -5000;
+        //is the sample code using two different "q"s? A state-action and a value assocsiated with a state-action? I got no fucking clue
+        //is it storing a value associated with that particular action-state combo?
+        int[][] OldQ = {null,null};
+        int OldQVal = -5000;
+        int newQVal = -5000;
+        //code for "learning" Q
+        if (OldQ == {null,null} || OldQ == {null,null}) {
+            newQVal = reward; 
         }
         else
         newQ = OldQ + alpha*(Q - OldQ);
