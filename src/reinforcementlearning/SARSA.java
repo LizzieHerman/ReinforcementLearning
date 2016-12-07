@@ -13,12 +13,12 @@ public class SARSA extends Algorithm{
         prob = p;
     }
     
-    public double[] findNextMove(){
+    public int[] findNextMove(){
         double explore = random.nextDouble();
         if(explore < prob){
             return super.findNextMove();
         }
-        double[] accl = {0,0};
+        int[] accl = {0,0};
         
        // TO-DO implement algorithm
           // TO-DO implement algorithm

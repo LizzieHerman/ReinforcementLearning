@@ -1,6 +1,6 @@
 package reinforcementlearning;
 
-import java.util.Random;
+import java.util.*;
 
 /**
  *
@@ -16,6 +16,8 @@ public class Algorithm {
     protected Random random;
     private int crash;
     private int move;
+    protected ArrayList<int[]> possMoves = new ArrayList<int[]>();
+    protected char[][] knownTrack;
     
     public Algorithm(RaceTrack t, RaceCar c, TrackGUI g){
         track = t;
@@ -23,6 +25,14 @@ public class Algorithm {
         gui = g;
         orgPos = new int[2];
         random = new Random();
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                int[] temp = {i,j};
+                possMoves.add(temp);
+            }
+        }
+        int[] size = track.getSize();
+        knownTrack = new char[size[1]][size[0]];
     }
     
     public void runCar(boolean hit){
@@ -35,12 +45,13 @@ public class Algorithm {
         boolean finished = false;
         int lastxp, lastyp;
         while(! finished){
+            lastxp = car.getXPos();
+            lastyp = car.getYPos();
+            knownTrack[lastxp][lastyp] = '.';
             //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
             int[] accl = findNextMove();
             if(car.accelNotWork(accl[0], accl[1], 1)) continue;
             cost++;
-            lastxp = car.getXPos();
-            lastyp = car.getYPos();
             time += 1;
             car.accelerate(accl[0], accl[1], 1);
             if(track.notCrash(car.getXPos(), car.getYPos(), lastxp, lastyp)){
@@ -55,7 +66,13 @@ public class Algorithm {
                 }
             } else {
                 crash++;
-                // car.setPos(lastxp, lastyp); car.setVel(0, 0);
+                try {
+                    knownTrack[car.getXPos()][car.getYPos()] = '#';
+                } catch(IndexOutOfBoundsException e){
+                    //System.out.println("Car Jumped completely off the board");
+                }
+                
+            // car.setPos(lastxp, lastyp); car.setVel(0, 0);
                 //System.out.println("Car crashed into wall trying to get to (" + car.getXPos() + "," + car.getYPos() + ")");
                 if(hit){
                     hitWall();
@@ -187,9 +204,8 @@ public class Algorithm {
     // this method returns a double array of accel it wants to do
     // this is the method we need to change
     public int[] findNextMove(){
-        int x = (random.nextInt(2)-random.nextInt(2));
-        int y = (random.nextInt(2)-random.nextInt(2));
-        int[] accl = {x,y};
+        int a = random.nextInt(possMoves.size());
+        int[] accl = possMoves.get(a);
         return accl;
     }
     
