@@ -19,9 +19,26 @@ public class SARSA extends Algorithm{
             return super.findNextMove();
         }
         int[] accl = {0,0};
+        //****************
+        //***READ THIS:***
+        //****************
+        //Alright, this is what's going on. Q(s,a) is reward associated with an action state. 
+        //Since there's so many actions that can take us too/from a state we're going to need to store these in an ever-expanding array list.
+        //When the agent lands in a space, they search the array list to see if this is a situation it's been in before, if it's current Q(s,a) has a value.
+        //If it does, the agent can see any rewards associated with actions it took in this state. It will avoid actions that yeilded a negative reward (crashing).
+        //It will look for actions that yeled a positive reward (took it closer to the goal) and try to take those, but can still move randomly to explore, which will make more arraylist entires.
+        //PROBLEMS:
+        //when we start our agent knows NOTHING. How do we give the agent the "Right" reward for a move here?
+        //If our reward is negative, our agent will explore like CRAZY avoiding any path it's taken before whenever possible.
+        //If our reward is positive it would be easy for our agent to simply fall into an infinte loop of safe moves.
+        //--Is agent training supposed to solve this? To make a path of waypoints for the agent to follow to the goal?
+        //Agent training is very ineffeicent, requiring the agent to land on a particular state (square) with a particular action (current X and Y accel) 
+        //to point it in the right direction. But what are the odds our agent will ever land on an exact square with that exact action?
+        //I think this is where running it many, many times starting it close to the goal and moving it farther and farther away comes into play,
+        // to fill in the arrayList with "good(as well as bad)" moves as we get closer to the goal so our agent "knows where to go"
         
        // TO-DO implement algorithm
-          // TO-DO implement algorithm
+          // Equasion details:
          //Q(s{t},a{t}) leftarrow Q(s{t},a{t})+ alpha [r{{t+1}}+ gamma Q(s{{t+1}},a{{t+1}})-Q(s{t},a{t})]
         //Q is the value for a state-action, updated by error
         //Q values represent the possible reward received in the next time step for taking action a in state s
@@ -30,8 +47,7 @@ public class SARSA extends Algorithm{
         //
         //ALPHA - The learning rate determines to what extent the newly acquired information will override the old information. A factor of 0 will make the agent not learn anything, while a factor of 1 would make the agent consider only the most recent information.
         //GAMMA - The discount factor determines the importance of future rewards. A factor of 0 will make the agent "opportunistic" by only considering current rewards, while a factor approaching 1 will make it strive for a long-term high reward. If the discount factor meets or exceeds 1, the {\displaystyle Q} Q values may diverge.
-        //LOOK AT THE CODE ATTACHED TO THIS FUCKING WEB PAGE IF IT STILL ISN'T MAKING SENSE: https://studywolf.wordpress.com/2013/07/01/reinforcement-learning-sarsa-vs-q-learning/
-        // OR EXAMPLE CODE HERE: https://github.com/studywolf/blog/tree/master/RL/SARSA%20vs%20Qlearn%20cliff
+        //REALLY GOOD EXPLINATION HERE: http://stackoverflow.com/questions/29879172/sarsa-implementation
         
         //Q(s{t},a{t}) leftarrow Q(s{t},a{t})+ alpha [r{{t+1}}+ gamma Q(s{{t+1}},a{{t+1}})-Q(s{t},a{t})]
         int newXaccel = 0;
