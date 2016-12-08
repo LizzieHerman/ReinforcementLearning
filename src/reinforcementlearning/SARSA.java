@@ -66,7 +66,15 @@ public class SARSA extends Algorithm {
         //in "choose action" method q = [self.getQ(state, a) for a in self.actions]
         //int[][] Q = {state, action};
 
+        /*
+        My current stupid-ass non-working SARSA code may need to simply "return accel"
+        when the code indicates to move, and update the reward for that state-action 
+        at the START of the next time it's method is called 
+        to work with the foundation of code we already have.
+        */
+            
         //""real"" code starts here-
+        //UPDATE LAST STATE-ACTION RESULT HERE instead of farther down in the code?
         //Car lands in an action-state:
         ArrayList state = new ArrayList();
         ArrayList action = new ArrayList();
