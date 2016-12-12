@@ -22,21 +22,24 @@ public class ValueIteration extends Algorithm{
         values = initializeStateValues();
     }
     
-    public int[] findNextMove(){
-    	
+    public int[] findNextMove(RaceCar c){
+    	System.out.println("Pos: "+c.getXPos()+","+c.getYPos());
+    	System.out.println("Pos: "+c.getXVel()+","+c.getYVel());
         int[] accl = {0,0};
         //int[] carState = {c.getXPos(),c.getYPos(),c.getXVel(),c.getYVel()};
         int[] currState={0,0,0,0,0};
         for(int [] state : values){
             if(matches(c, state)){
+            	
             	currState=state;
+            	//System.out.println("matches: "+currState[1]+" and "+c.getYPos());
                 break;
             }
         }
+        //System.out.println(currState[0]+","+currState[1]);
         //int currVal = currState[4];
-        RaceCar car = new RaceCar(c.getXPos(),c.getXPos());
+        RaceCar car = new RaceCar(c.getXPos(),c.getYPos());
         int[] maxState = {0,0,0,0,0};
-        boolean found=false;
         // Find each possible next state based on possible accelerations and select best acceleration
         for(int accX = -1; accX<2; accX++){
             for(int accY = -1; accY<2; accY++){
@@ -46,9 +49,10 @@ public class ValueIteration extends Algorithm{
                 
                 for(int[] nextState:values){ // find the corresponding value
                     if(matches(car, nextState)){
-                        if(currState[4]>maxState[4]){ // best next value
+                        if(nextState[4]>maxState[4]){ // best next value
                         	//System.out.println(maxState[4]);
-                        	found=true;
+                        	c.setVel(c.getXVel()+accX,c.getYVel()+accY);
+                            c.setPos(c.getXVel()+accX+c.getXPos(),c.getYVel()+accY+c.getYPos());
                             maxState=nextState;
                             accl[0]=accX;
                             accl[1]=accY;
@@ -62,10 +66,11 @@ public class ValueIteration extends Algorithm{
         // Calculate and set updated state value
         double gamma = .01;
         // The surrounding values shoot down to 1
-        System.out.println(currState[4]);
+        System.out.println(currState[4]+" curr pos: "+ currState[0]+","+currState[1]);
         int[] newState = {currState[0],currState[1],currState[2],currState[3], (int) (currState[4]*gamma*maxState[4])+1};
         values.set(values.indexOf(currState),newState);
-        //System.out.println("next value: " + newState[4]);
+        System.out.println("acc: " + accl[0]+","+accl[1]+"\n");
+        System.out.println("Nextpos "+maxState[0]+","+maxState[1]);
         
         return accl;
     }
