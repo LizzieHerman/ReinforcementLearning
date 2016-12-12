@@ -74,7 +74,7 @@ public class ReinforcementLearning {
                 RaceCar car = new RaceCar(x,y);
                 Algorithm algorithm;
                 // choose which algorithm to run
-                switch('a'){
+                switch('s'){
                     case 'v':
                         algorithm = new ValueIteration(track,car,gui);
                         break;

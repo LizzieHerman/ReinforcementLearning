@@ -214,6 +214,16 @@ public class RaceTrack {
         return finish;
     }
     
+    public char getSymbol(int x, int y){
+    	return track[x][y];
+    }
+    
+    public char getName(){
+    	return name;
+    }
+    
+    
+    
     public int[] getNextStepBackFromFinish(int steps){
         Random random = new Random();
         int num = random.nextInt(finish.size());
