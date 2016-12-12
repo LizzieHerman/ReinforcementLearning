@@ -12,7 +12,9 @@ public class SARSA extends Algorithm {
 	private GridSquare[][] board;  //Holds the GridSquares, same size as the track
 	private GridSquare s, s1;
 	private RaceCar car;
-	private double prob, alpha, gamma, tempQ;
+	private RaceTrack track;
+	private double prob, alpha, gamma;
+	private double[] tempQ;
 	private int steps, a, a1;
 	private int[] nextCell;
 	private String key;
@@ -22,8 +24,10 @@ public class SARSA extends Algorithm {
 		prob = p;
 		this.steps = 1;
 		this.car = c;
+		this.track = t;
 		this.board = new GridSquare[t.getSize()[0]][t.getSize()[1]];
-		this.nextCell = new int[2];
+		this.nextCell = new int[]{this.car.getXPos(), this.car.getYPos()};
+		this.tempQ = new double[4];
 		
 		//Set up the grid to hold q values
 		for(int i = 0; i < t.getSize()[0]; i++){
@@ -44,15 +48,20 @@ public class SARSA extends Algorithm {
 		this.alpha = 1/this.steps;  //Decay the learning rate
 		
 		//Check if action changed velocity
-		if(nextCell[0] == this.car.getXPos() && nextCell[1] == this.car.getYPos()){
+		if(nextCell[0] == this.car.getXPos() && nextCell[1] == this.car.getYPos()){  //Car moved where it was supposed to go
 			this.car.updateFacing(this.car.getXVel(), this.car.getYVel());//Update facing
-			this.s.velTable.get(this.key)[a] = tempQ;  //Store the calculated q-value
+		}else if(this.car.getReset()){  //Car crashed, reset the facing
+			this.car.startFacing(this.track.getName());
+			this.car.setReset(false);
 			this.s = board[this.car.getXPos()][this.car.getYPos()];  //Update state to current location
-			this.a = chooseAction(s);
-		}else{
+			this.a = chooseAction(s);  //Choose an action for the new state
+		}else{  //Acceleration did not happen from previous loop
 			if(this.steps-1 != 0){
-				this.alpha = 1/(this.steps-1);  //Decay the learning rate
+				this.alpha = 1/(this.steps-1);  //Restore the learning rate to previous value
 			}
+			this.s.velTable.put(this.key, this.tempQ);  //Reset the calculated q-value since it is not accurate for the resulting position
+			this.s = board[this.car.getXPos()][this.car.getYPos()];  //Update state to current location
+			this.a = chooseAction(s);  //Choose an action for the new state
 		}
 		
 		int[] accel = findAccel(a); //Take action a
@@ -64,9 +73,14 @@ public class SARSA extends Algorithm {
 		this.a1 = chooseAction(s1); //Determine which action to take
 		this.key = this.car.getXVel() + "/" + this.car.getYVel();  //Get key for the hashtable
 		
-		//Update equation for new Q(s,a) value
-		this.tempQ = this.s.velTable.get(this.key)[a];
-		this.s.velTable.get(this.key)[a] = s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.highestQ(this.car.getXVel(), this.car.getYVel())[1]) - s.velTable.get(this.key)[a]);  //Q(s,a) = Q(s,a) + alpha*(reward(s1) + gamma*Q(s1,a1) - Q(s,a))
+		//Update equation for new Q(s,a) value, store in the action array
+		this.tempQ = this.s.velTable.get(this.key);  //Store the previous action q-value list, in case acceleration does not happen
+		
+		//Q(s,a) = Q(s,a) + alpha*(reward(s1) + gamma*Q(s1,a1) - Q(s,a))
+		double newQ = s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.highestQ(this.car.getXVel(), this.car.getYVel())[1]) - s.velTable.get(this.key)[a]);
+		double[] updateActionQ = this.tempQ;
+		updateActionQ[a] = newQ;
+		this.s.velTable.put(this.key, updateActionQ);  //Store the new q-value in the action list
 		
 		s = s1; //Set s to next state
 		a = a1; //Set a to next action
@@ -82,7 +96,7 @@ public class SARSA extends Algorithm {
 		
 		//Epsilon Greedy
 		if(random <= this.prob){
-			a = (int) Math.random()*4; //Pick a random action
+			a = (int) (Math.random()*4); //Pick a random action
 		}else{
 			double[] result = s.highestQ(this.car.getXVel(), this.car.getYVel()); //Pick the best action by finding highest q-value
 			a = (int) result[0];
@@ -189,7 +203,7 @@ public class SARSA extends Algorithm {
 			}
 			
 			if(equalQ){
-				index = (int) Math.random()*4; //Pick an action if all q-values are the same
+				index = (int) (Math.random()*4); //Pick an action if all q-values are the same
 			}
 			
 			double[] values = new double[]{index, highestQ};

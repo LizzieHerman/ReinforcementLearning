@@ -94,6 +94,7 @@ public class Algorithm {
     public void hitWall(){
         car.setPos(orgPos[0], orgPos[1]);
         car.setVel(0, 0);
+        car.setReset(true);
     }
     
     // when sent back to closest empty site of crash
