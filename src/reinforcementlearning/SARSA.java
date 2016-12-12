@@ -62,15 +62,20 @@ public class SARSA extends Algorithm {
 			this.s.velTable.put(this.key, this.tempQ);  //Reset the calculated q-value since it is not accurate for the resulting position
 			this.s = board[this.car.getXPos()][this.car.getYPos()];  //Update state to current location
 			this.a = chooseAction(s);  //Choose an action for the new state
+			System.out.println("Choosing action: " + this.a);
 		}
 		
 		int[] accel = findAccel(a); //Take action a
 		this.s1 = this.board[this.car.getXPos() + accel[0]][this.car.getYPos() + accel[1]]; //Set up next state
 		this.nextCell[0] = this.car.getXPos() + accel[0];  //Keep track of where the car should end up if acceleration is applied
 		this.nextCell[1] = this.car.getYPos() + accel[1];
+		System.out.println("Recommended acceleration: (" + accel[0] + "," + accel[1] + ")");
+		System.out.println("Next cell should be (" + this.nextCell[0] + "," + this.nextCell[1] + ")");
 		int reward = s1.reward; //Get reward from the next state
+		System.out.println("Reward for next state: " + reward);
 		
 		this.a1 = chooseAction(s1); //Determine which action to take
+		System.out.println("Choosing action at next state: " + this.a1);
 		this.key = this.car.getXVel() + "/" + this.car.getYVel();  //Get key for the hashtable
 		
 		//Update equation for new Q(s,a) value, store in the action array
@@ -81,6 +86,7 @@ public class SARSA extends Algorithm {
 		double[] updateActionQ = this.tempQ;
 		updateActionQ[a] = newQ;
 		this.s.velTable.put(this.key, updateActionQ);  //Store the new q-value in the action list
+		System.out.println("Updated Q-value for action at initial state: " + newQ);
 		
 		s = s1; //Set s to next state
 		a = a1; //Set a to next action
