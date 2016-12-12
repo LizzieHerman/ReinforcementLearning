@@ -66,8 +66,10 @@ public class RaceTrack {
         }
     }
 
-    public boolean crash(int x1, int y1, int x2, int y2){
+    public boolean notCrash(int x1, int y1, int x2, int y2){
         char cell;
+        int changex = Math.abs(x1-x2);
+        int changey = Math.abs(y1-y2);
         if(! cellSafe(x1,y1)){
             return false;
         }
@@ -98,9 +100,46 @@ public class RaceTrack {
                         if(cell == '#') return false;
                     }
                 }
+            } else if(changex == 1 && changey == 1){
+                int x, y;
+                if(x1<x2) x = x1;
+                else x = x2;
+                if(y1<y2) y = y1;
+                else y = y2;
+                for(int i = 0; i < 2; i++){
+                    for(int j = 0; j < 2; j++){
+                        if(! cellSafe(x+i,y+j)) return false;
+                    }
+                }
+            } else if(changey > changex){
+                double slope = changex / changey;
+                int x,y;
+                double xd;
+                if(x1<x2){
+                    x = x1;
+                    xd = x1;
+                }
+                else{
+                    x = x2;
+                    xd = x2;
+                }
+                if(y1<y2) y = y1;
+                else y = y2;
+                for(int i = 0; i <= changey; i++){
+                    xd += slope;
+                    x = (int) xd;
+                    if(i != 0 && (x-1) == (int)(xd-slope) && !((x-1) < x1 && (x-1) < x2)){
+                        cell = track[y+i][x-1];
+                        if(cell == '#') return false;
+                    }
+                    cell = track[y+i][x];
+                    if(cell == '#') return false;
+                    if(i != changey && (x+1) == (int)(xd+slope) && !((x+1) > x1 && (x+1) > x2)){
+                        cell = track[y+i][x+1];
+                        if(cell == '#') return false;
+                    }
+                }
             } else {
-                int changex = Math.abs(x1-x2);
-                int changey = Math.abs(y1-y2);
                 double slope = changey / changex;
                 int x,y;
                 double yd;
@@ -174,6 +213,16 @@ public class RaceTrack {
     public ArrayList<int[]> getFinish(){
         return finish;
     }
+    
+    public char getSymbol(int x, int y){
+    	return track[x][y];
+    }
+    
+    public char getName(){
+    	return name;
+    }
+    
+    
     
     public int[] getNextStepBackFromFinish(int steps){
         Random random = new Random();

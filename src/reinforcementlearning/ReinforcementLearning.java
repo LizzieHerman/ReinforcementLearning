@@ -13,12 +13,12 @@ public class ReinforcementLearning {
      */
     public static void main(String[] args) {
         //loop through different tracks
-        char[] letters = {'O'};//, 'O', 'R'};
+        char[] letters = {'L', 'O', 'R'};
         //char letter = 'R';
         int i = 1;
         boolean notStart = true;
         for(char letter : letters){
-            while(i <= 1){
+            while(i <= 10){
                 String filename;
                 switch(letter){
                     case 'L':
@@ -39,8 +39,8 @@ public class ReinforcementLearning {
                 RaceTrack track = new RaceTrack(filename);
                 // create gui to show what is happening
                 TrackGUI gui = new TrackGUI(track.getCopyOfTrack(), letter);
-                gui.pack();
-                gui.setVisible(true);
+                //gui.pack();
+                //gui.setVisible(true);
                 boolean safe = true;
                 int x = 0,y = 0;
                 Random random = new Random();
@@ -52,12 +52,10 @@ public class ReinforcementLearning {
                         int j = random.nextInt(start.size());
                         pos = start.get(j);
                         x = pos[0]; y = pos[1];
-                        gui.updateTrack(x, y, 0, 0, 0, 0);
                         break;
                     case "final":                       
                         pos = track.getNextStepBackFromFinish(i);
                         x = pos[0]; y = pos[1];
-                        gui.updateTrack(x, y, 0, 0, 0, 0);
                         //System.out.println(i);
                         notStart = (track.getCell(x, y) != 'S');
                         i++;
@@ -69,14 +67,14 @@ public class ReinforcementLearning {
                             y = size[0] - (1 + random.nextInt(size[0]));
                             safe = track.cellSafe(x, y);
                         } while(! safe);
-                        gui.updateTrack(x, y, 0, 0, 0, 0);
                         break;
                 }
+                //gui.updateTrack(x, y, 0, 0, 0, 0);
 
                 RaceCar car = new RaceCar(x,y);
                 Algorithm algorithm;
                 // choose which algorithm to run
-                switch('a'){
+                switch('s'){
                     case 'v':
                         algorithm = new ValueIteration(track,car,gui);
                         break;
@@ -95,7 +93,7 @@ public class ReinforcementLearning {
                 // run algorithm
                 algorithm.runCar(crash);
 
-                gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), algorithm.getTime(), algorithm.getCost());
+                //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), algorithm.getTime(), algorithm.getCost());
                 System.out.println(algorithm.toString());
                 //gui.dispose();
                 i++;
