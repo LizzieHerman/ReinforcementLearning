@@ -44,12 +44,18 @@ public class Algorithm {
         orgPos[1] = car.getYPos();
         boolean finished = false;
         int lastxp, lastyp;
+        int i=0;
         while(! finished){
+        	if(i>10000){
+        		System.out.println("ran too slow");
+        		break;
+        	}
+        	i++;
             lastxp = car.getXPos();
             lastyp = car.getYPos();
             knownTrack[lastxp][lastyp] = '.';
-            //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
-            int[] accl = findNextMove();
+            gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
+            int[] accl = findNextMove(car);
             if(car.accelNotWork(accl[0], accl[1], 1)) continue;
             cost++;
             time += 1;
@@ -204,7 +210,7 @@ public class Algorithm {
     
     // this method returns a double array of accel it wants to do
     // this is the method we need to change
-    public int[] findNextMove(){
+    public int[] findNextMove(RaceCar car2){
         int a = random.nextInt(possMoves.size());
         int[] accl = possMoves.get(a);
         return accl;
