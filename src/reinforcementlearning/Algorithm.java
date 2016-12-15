@@ -44,24 +44,30 @@ public class Algorithm {
         orgPos[1] = car.getYPos();
         boolean finished = false;
         int lastxp, lastyp;
-        int i=0;
         while(! finished){
-        	if(i>10000){
-        		System.out.println("ran too slow");
-        		break;
-        	}
-        	i++;
             lastxp = car.getXPos();
             lastyp = car.getYPos();
             knownTrack[lastxp][lastyp] = '.';
-            gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
-            int[] accl = findNextMove(car);
-            if(car.accelNotWork(accl[0], accl[1], 1)) continue;
+            //gui.updateTrack(car.getXPos(), car.getYPos(), car.getXVel(), car.getYVel(), time, cost);
+            int[] accl = findNextMove();
+            if(car.accelNotWork(accl[0], accl[1], 1)){
+            	//System.out.println("---------------Accel didnt work");
+            	continue;
+            }
             cost++;
             time += 1;
-            car.accelerate(accl[0], accl[1], 1);
+            
+            if(track.outofBounds){
+            	car.setPos(track.limit[0], track.limit[1]);
+            	track.outofBounds = false;
+            }else{
+            	car.accelerate(accl[0], accl[1], 1);
+            }
+            
             if(track.notCrash(car.getXPos(), car.getYPos(), lastxp, lastyp)){
                 move++;
+                car.setVel(car.getXVel() + accl[0], car.getYVel() + accl[1]);
+                car.setPos(car.getXPos() + car.getXVel(), car.getYPos() + car.getYVel());
                 if(track.getCell(car.getXPos(), car.getYPos()) == 'F'){
                     //System.out.println("last position: (" + lastxp + "," + lastyp + ")");
                     System.out.print("final position: (" + car.getXPos() + "," + car.getYPos() + ")");
@@ -72,6 +78,8 @@ public class Algorithm {
                 }
             } else {
                 crash++;
+                car.setVel(car.getXVel() + accl[0], car.getYVel() + accl[1]);
+                car.setPos(car.getXPos() + car.getXVel(), car.getYPos() + car.getYVel());
                 try {
                     knownTrack[car.getXPos()][car.getYPos()] = '#';
                 } catch(IndexOutOfBoundsException e){
@@ -79,7 +87,7 @@ public class Algorithm {
                 }
                 
             // car.setPos(lastxp, lastyp); car.setVel(0, 0);
-                //System.out.println("Car crashed into wall trying to get to (" + car.getXPos() + "," + car.getYPos() + ")");
+                System.out.println("Car crashed into wall trying to get to (" + car.getXPos() + "," + car.getYPos() + ")");
                 if(hit){
                     hitWall();
                     //System.out.println("Car sent to (" + car.getXPos() + "," + car.getYPos() + ")");
@@ -93,6 +101,7 @@ public class Algorithm {
                     return;
                 }
             }
+            //System.out.println("Current position: (" + car.getXPos() + "," + car.getYPos() + ")");
         }
     }
     
@@ -210,7 +219,7 @@ public class Algorithm {
     
     // this method returns a double array of accel it wants to do
     // this is the method we need to change
-    public int[] findNextMove(RaceCar car2){
+    public int[] findNextMove(){
         int a = random.nextInt(possMoves.size());
         int[] accl = possMoves.get(a);
         return accl;

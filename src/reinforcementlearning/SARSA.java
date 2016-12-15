@@ -45,7 +45,11 @@ public class SARSA extends Algorithm {
 	
 	//Find move and update q-value for appropriate state-action pair
 	public int[] findNextMove(){
-		this.alpha = 1/this.steps;  //Decay the learning rate
+		//this.alpha = 1/this.steps;  //Decay the learning rate
+		this.car.setVel(super.car.getXVel(), super.car.getYVel());
+		this.car.setPos(super.car.getXPos(), super.car.getYPos());
+		//System.out.println("\n SARSA position: (" + this.car.getXPos() + "," + this.car.getYPos() + ")");
+		//System.out.println("Reward for start state: " + s.reward);
 		
 		//Check if action changed velocity
 		if(nextCell[0] == this.car.getXPos() && nextCell[1] == this.car.getYPos()){  //Car moved where it was supposed to go
@@ -62,36 +66,84 @@ public class SARSA extends Algorithm {
 			this.s.velTable.put(this.key, this.tempQ);  //Reset the calculated q-value since it is not accurate for the resulting position
 			this.s = board[this.car.getXPos()][this.car.getYPos()];  //Update state to current location
 			this.a = chooseAction(s);  //Choose an action for the new state
-			System.out.println("Choosing action: " + this.a);
+			//System.out.println("Choosing action: " + this.a);
 		}
 		
 		int[] accel = findAccel(a); //Take action a
-		this.s1 = this.board[this.car.getXPos() + accel[0]][this.car.getYPos() + accel[1]]; //Set up next state
-		this.nextCell[0] = this.car.getXPos() + accel[0];  //Keep track of where the car should end up if acceleration is applied
-		this.nextCell[1] = this.car.getYPos() + accel[1];
-		System.out.println("Recommended acceleration: (" + accel[0] + "," + accel[1] + ")");
-		System.out.println("Next cell should be (" + this.nextCell[0] + "," + this.nextCell[1] + ")");
-		int reward = s1.reward; //Get reward from the next state
+		
+		//Check to make sure car ends up in bounds of the grid array
+		int[] limit = this.track.checkBounds(accel, this.car.getXPos(), this.car.getYPos(), this.car.getXVel(), this.car.getYVel());
+		if(limit[0] == car.getXPos()){
+			if(limit[1] == car.getYPos()){
+				int action = this.a;
+				if(this.car.getXPos() + accel[0] > this.track.getSize()[0] || this.car.getXPos() + accel[0] < 0){
+					while(this.a == action){
+						this.a = chooseAction(s);
+					}
+					this.s1 = this.board[this.car.getXPos() + accel[0]][this.car.getYPos() + accel[1]]; //Set up next state
+				}else if(this.car.getYPos() + accel[1] > this.track.getSize()[1] || this.car.getYPos() + accel[1] < 0){
+					while(this.a == action){
+						this.a = chooseAction(s);
+					}
+					this.s1 = this.board[this.car.getXPos() + accel[0]][this.car.getYPos() + accel[1]]; //Set up next state
+				}else{
+					this.s1 = this.board[this.car.getXPos() + accel[0]][this.car.getYPos() + accel[1]]; //Set up next state
+				}
+				this.nextCell[0] = this.car.getXPos() + this.car.getXVel() + accel[0];  //Keep track of where the car should end up if acceleration is applied
+				this.nextCell[1] = this.car.getYPos() + this.car.getYVel() + accel[1];
+			}
+		}else{
+			this.s1 = this.board[limit[0]][limit[1]]; //Set up next state, car at limit of grid
+			this.car.setPos(limit[0] - accel[0], limit[1] - accel[1]);
+			super.car.setPos(limit[0] - accel[0], limit[1] - accel[1]);
+			this.nextCell[0] = limit[0];  //Keep track of where the car should end up if acceleration is applied
+			this.nextCell[1] = limit[1];
+		}
+		
+//		this.nextCell[0] = this.car.getXPos() + this.car.getXVel() + accel[0];  //Keep track of where the car should end up if acceleration is applied
+//		this.nextCell[1] = this.car.getYPos() + this.car.getYVel() + accel[1];
+//		this.nextCell[0] = limit[0];  //Keep track of where the car should end up if acceleration is applied
+//		this.nextCell[1] = limit[1];
+		
+		//System.out.println("Recommended acceleration: (" + accel[0] + "," + accel[1] + ")");
+		//System.out.println("Next cell should be (" + this.nextCell[0] + "," + this.nextCell[1] + ")");
+		double reward = s1.reward; //Get reward from the next state
 		System.out.println("Reward for next state: " + reward);
 		
 		this.a1 = chooseAction(s1); //Determine which action to take
-		System.out.println("Choosing action at next state: " + this.a1);
+		//System.out.println("Choosing action at next state: " + this.a1);
 		this.key = this.car.getXVel() + "/" + this.car.getYVel();  //Get key for the hashtable
 		
 		//Update equation for new Q(s,a) value, store in the action array
 		this.tempQ = this.s.velTable.get(this.key);  //Store the previous action q-value list, in case acceleration does not happen
 		
 		//Q(s,a) = Q(s,a) + alpha*(reward(s1) + gamma*Q(s1,a1) - Q(s,a))
-		double newQ = s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.highestQ(this.car.getXVel(), this.car.getYVel())[1]) - s.velTable.get(this.key)[a]);
+		//double newQ = s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.highestQ(this.car.getXVel(), this.car.getYVel())[1]) - s.velTable.get(this.key)[a]);
+		int newXVel = this.car.getXVel() + accel[0];
+		int newYVel = this.car.getXVel() + accel[0];
+		
+		String nextKey = newXVel + "/" + newYVel;
+		
+		//System.out.println("TEST: " + s.velTable.get(this.key)[a] + " + " + (this.gamma*(reward + (this.gamma*s1.velTable.get(nextKey)[a1]) - s.velTable.get(this.key)[a])));
+		//double newQ = s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.velTable.get(nextKey)[a1]) - s.velTable.get(this.key)[a]);
+		//System.out.println("EQUATION: " + s.velTable.get(this.key)[a] + this.alpha*(reward + (this.gamma*s1.velTable.get(nextKey)[a1]) - s.velTable.get(this.key)[a]));
+		//System.out.println("newQ=" + newQ);
+		
+		double part1 = s.velTable.get(this.key)[a];
+		double part2 = (this.gamma*(reward + (this.gamma*s1.velTable.get(nextKey)[a1]) - s.velTable.get(this.key)[a]));
+		part1 = part1 + part2;
+		//System.out.println(part1);
 		double[] updateActionQ = this.tempQ;
-		updateActionQ[a] = newQ;
+		updateActionQ[a] = part1;
 		this.s.velTable.put(this.key, updateActionQ);  //Store the new q-value in the action list
-		System.out.println("Updated Q-value for action at initial state: " + newQ);
+		//System.out.println("Velocity: (" + this.car.getXVel() + "," + this.car.getYVel() + ")");
+		System.out.println("Updated Q-value for action at initial state: " + part1);
 		
 		s = s1; //Set s to next state
 		a = a1; //Set a to next action
 		
 		this.steps++;
+		//System.out.println("step count: " + this.steps);
 		return accel;
 	}
 	
@@ -116,43 +168,43 @@ public class SARSA extends Algorithm {
 		//check facing  //accel
 		if(this.car.getFacing() == 0){  //Facing left
 			if(index == 0){ //Accel left
-				accel = new int[]{0,-1};
-			}else if(index == 1){ //Accel forward
-				accel = new int[]{-1,0};
-			}else if(index == 2){ //Accel right
-				accel = new int[]{0,1};
-			}else{ //Accel backward
 				accel = new int[]{1,0};
+			}else if(index == 1){ //Accel forward
+				accel = new int[]{0,-1};
+			}else if(index == 2){ //Accel right
+				accel = new int[]{-1,0};
+			}else{ //Accel backward
+				accel = new int[]{0,1};
 			}
 		}else if(this.car.getFacing() == 1){  //Facing up
 			if(index == 0){ //Accel left
-				accel = new int[]{-1,0};
-			}else if(index == 1){ //Accel forward
-				accel = new int[]{0,1};
-			}else if(index == 2){ //Accel right
-				accel = new int[]{1,0};
-			}else{ //Accel backward
 				accel = new int[]{0,-1};
+			}else if(index == 1){ //Accel forward
+				accel = new int[]{-1,0};
+			}else if(index == 2){ //Accel right
+				accel = new int[]{0,1};
+			}else{ //Accel backward
+				accel = new int[]{1,0};
 			}
 		}else if(this.car.getFacing() == 2){  //Facing right
 			if(index == 0){ //Accel left
-				accel = new int[]{0,1};
-			}else if(index == 1){ //Accel forward
-				accel = new int[]{1,0};
-			}else if(index == 2){ //Accel right
-				accel = new int[]{0,-1};
-			}else{ //Accel backward
 				accel = new int[]{-1,0};
+			}else if(index == 1){ //Accel forward
+				accel = new int[]{0,1};
+			}else if(index == 2){ //Accel right
+				accel = new int[]{1,0};
+			}else{ //Accel backward
+				accel = new int[]{0,-1};
 			}
 		}else{  //Facing down
 			if(index == 0){ //Accel left
-				accel = new int[]{1,0};
-			}else if(index == 1){ //Accel forward
-				accel = new int[]{0,-1};
-			}else if(index == 2){ //Accel right
-				accel = new int[]{-1,0};
-			}else{ //Accel backward
 				accel = new int[]{0,1};
+			}else if(index == 1){ //Accel forward
+				accel = new int[]{1,0};
+			}else if(index == 2){ //Accel right
+				accel = new int[]{0,-1};
+			}else{ //Accel backward
+				accel = new int[]{-1,0};
 			}
 		}
 		
@@ -182,7 +234,7 @@ public class SARSA extends Algorithm {
 			
 			//Set up the reward value for the grid square
 			if(trackSymbol == 'S'){
-				this.reward = 0;
+				this.reward = -10;
 			}else if(trackSymbol == 'F'){
 				this.reward = 1000;
 			}else if(trackSymbol == '#'){

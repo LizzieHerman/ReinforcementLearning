@@ -39,8 +39,8 @@ public class ReinforcementLearning {
                 RaceTrack track = new RaceTrack(filename);
                 // create gui to show what is happening
                 TrackGUI gui = new TrackGUI(track.getCopyOfTrack(), letter);
-                gui.pack();
-                gui.setVisible(true);
+                //gui.pack();
+                //gui.setVisible(true);
                 boolean safe = true;
                 int x = 0,y = 0;
                 Random random = new Random();
@@ -69,12 +69,12 @@ public class ReinforcementLearning {
                         } while(! safe);
                         break;
                 }
-                gui.updateTrack(x, y, 0, 0, 0, 0);
+                //gui.updateTrack(x, y, 0, 0, 0, 0);
 
                 RaceCar car = new RaceCar(x,y);
                 Algorithm algorithm;
                 // choose which algorithm to run
-                switch('v'){
+                switch('s'){
                     case 'v':
                         algorithm = new ValueIteration(track,car,gui);
                         break;

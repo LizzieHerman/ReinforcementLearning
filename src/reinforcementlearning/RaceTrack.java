@@ -12,9 +12,13 @@ public class RaceTrack {
     private ArrayList<int[]> start = new ArrayList();
     private ArrayList<int[]> finish = new ArrayList();
     private char name;
+    boolean outofBounds;
+    int[] limit;
     
     public RaceTrack(String filename){
-        try {
+        this.outofBounds = false;
+        this.limit = new int[2];
+    	try {
             name = filename.charAt(0);
             BufferedReader br = new BufferedReader(new FileReader(filename));
             String line = "";
@@ -222,7 +226,21 @@ public class RaceTrack {
     	return name;
     }
     
-    
+
+    public int[] checkBounds(int[] accel, int xpos, int ypos, int xvel, int yvel){
+    	int newx = xpos + xvel + accel[0];
+    	int newy = ypos + yvel + accel[1];
+    	
+    	if(newx >= track.length){
+    		xpos = track.length-1+accel[0];
+    	}
+    	if(newy >= track[0].length){
+    		ypos = track[0].length-1+accel[1];
+    	}
+    	this.outofBounds = true;
+    	this.limit = new int[]{xpos, ypos};
+    	return limit;
+    }
     
     public int[] getNextStepBackFromFinish(int steps){
         Random random = new Random();

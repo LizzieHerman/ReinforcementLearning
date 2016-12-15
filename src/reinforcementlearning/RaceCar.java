@@ -67,6 +67,15 @@ public class RaceCar {
             xvel += (xacc * t);
             yvel += (yacc * t);
         }
+        if(xvel > 5){
+        	xvel = 5;
+        }else if(yvel > 5){
+        	yvel = 5;
+        }else if(xvel < -5){
+        	xvel = -5;
+        }else if(yvel < -5){
+        	yvel = -5;
+        }
         xpos += (xvel * t);
         ypos += (yvel * t);
         int[] pos = {xpos, ypos};
